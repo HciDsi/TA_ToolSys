@@ -1,13 +1,12 @@
+__author__ = "HciDsi"
+
 import sys
 
-import maya.cmds
 from PySide2 import QtWidgets
 
 sys.path.append('D:/Project/DCC_Plug_in/Maya/MeshSelectionTool')
 
-import maya.cmds as cmds
-import maya.mel as mel
-import pymel
+import pymel.core as pm
 
 from PySide2.QtCore import *
 from PySide2.QtGui import *
@@ -15,9 +14,12 @@ from PySide2.QtWidgets import *
 
 import MeshSelection
 
+a = pm.selected()[0]
+b = a.getShape().inputs(type = 'shadingEngine')
+b[0].surfaceShader.inputs()
+
 
 class Selection(object):
-
     def __init__(self):
         self.gui_name = "MeshSelection"
         self.gui_title = "Metarial Selection Tool"
@@ -87,7 +89,7 @@ class Selection(object):
         self.clear_layout(self.object_layout)
         for n in self.obj_list:
             temp_layout = QtWidgets.QVBoxLayout()
-            temp_layout.addWidget(QLabel(n))
+            temp_layout.addWidget(QLabel(n.name()))
 
             temp_lv = QtWidgets.QVBoxLayout()
             temp_wt = QWidget()
@@ -96,8 +98,9 @@ class Selection(object):
             temp_sa.setWidget(temp_wt)
             temp_sa.setWidgetResizable(True)
             temp_layout.addWidget(temp_sa)
-            for a in range(0, 9):
-                temp_lv.addWidget(QPushButton(str(a)))
+            # for a in range(0, 9):
+            #     temp_lv.addWidget(QPushButton(str(a)))
+            self.add_material_button(n, temp_lv)
             temp_lv.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
             temp_widget = QWidget()
@@ -107,22 +110,41 @@ class Selection(object):
             self.object_layout.addWidget(temp_widget)
             self.object_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
+    def add_material_button(self, obj, layout):
+        shape = obj.getShape()
+        mate = shape.inputs(type = 'shadingEngine')
+        if not mate :
+            print("PPPPPPPPPPPPPPPPPPPPPPPPPP")
+        for shading_group in mate :
+            print('temp.name' + obj.name())
+            temp = shading_group.surfaceShading.inputs()[0]
+            print(temp.name)
+            print('temp.name')
+            layout.addWidget(QPushButton(temp.name()))
+
     def is_selection_shape(self):
         # Implement logic to check if the selection is a shape
+        selection = pm.selected(type = 'transform')
+        self.obj_list = [n for n in selection if n.getShape()]
 
-        selection = cmds.ls(selection=True)
-        if not selection:
-            QMessageBox.warning(self.gui, "Warning", "No object selected.")
+        if not self.obj_list :
             return False
 
-        self.obj_list = [cmds.listRelatives(sel, shapes=True, fullPath=True) for sel in selection]
-        if not self.obj_list:
-            QMessageBox.warning(self.gui, "Warning", "Selected object is not a shape.")
-            return False
-
-        self.obj_in.setText(", ".join(selection))
-        self.obj_list = selection
         return True
+
+        # selection = cmds.ls(selection=True)
+        # if not selection:
+        #     QMessageBox.warning(self.gui, "Warning", "No object selected.")
+        #     return False
+        #
+        # self.obj_list = [cmds.listRelatives(sel, shapes=True, fullPath=True) for sel in selection]
+        # if not self.obj_list:
+        #     QMessageBox.warning(self.gui, "Warning", "Selected object is not a shape.")
+        #     return False
+        #
+        # self.obj_in.setText(", ".join(selection))
+        # self.obj_list = selection
+        # return True
 
     def clear_layout(self, layout):
         while layout.count():

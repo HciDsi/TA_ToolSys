@@ -1,0 +1,8 @@
+Load warnings for D:/Art Resources/3DProject/Houdini/ProceduralCities/untitled.hip
+
+Warning:     
+
+/tasks/topnet1/localscheduler:
+
+             Skipping unrecognized parameter "sepparm3".
+             Skipping unrecognized parameter "folder0_2".
